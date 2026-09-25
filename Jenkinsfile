@@ -22,11 +22,10 @@ pipeline {
                 }
             }
         }
-        stage('Deploy (simulado)') {
+        stage('Deploy a Kubernetes') {
             steps {
-                sh 'docker stop demo-app || true'
-                sh 'docker rm demo-app || true'
-                sh 'docker run -d --name demo-app -p 3001:3001 ${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT}'
+                sh 'kubectl set image deployment/demo-app demo-app=${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT} --record'
+                sh 'kubectl rollout status deployment/demo-app'
             }
         }
     }
