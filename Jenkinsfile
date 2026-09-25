@@ -1,20 +1,32 @@
 pipeline {
     agent any
+    environment {
+        DOCKERHUB_USER = 'abelcornejo'
+        IMAGE_NAME = 'demo-app-cicd'
+    }
     stages {
         stage('Checkout') {
             steps { checkout scm }
         }
         stage('Build') {
-            steps { sh 'docker build -t demo-app:${GIT_COMMIT} .' }
+            steps { sh 'docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT} .' }
         }
         stage('Test') {
-            steps { sh 'docker run --rm demo-app:${GIT_COMMIT} npm test' }
+            steps { sh 'docker run --rm ${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT} npm test' }
+        }
+        stage('Push a Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT}'
+                }
+            }
         }
         stage('Deploy (simulado)') {
             steps {
                 sh 'docker stop demo-app || true'
                 sh 'docker rm demo-app || true'
-                sh 'docker run -d --name demo-app -p 3001:3001 demo-app:${GIT_COMMIT}'
+                sh 'docker run -d --name demo-app -p 3001:3001 ${DOCKERHUB_USER}/${IMAGE_NAME}:${GIT_COMMIT}'
             }
         }
     }
