@@ -1,5 +1,5 @@
 const http = require('http');
 http.createServer((req, res) => {
   res.writeHead(200);
-  res.end('Hola desde el pipeline CI/CD - version 1.3\n');
+  res.end('Hola desde el pipeline CI/CD - version 1.4\n');
 }).listen(3001);
