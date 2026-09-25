@@ -8,7 +8,7 @@ pipeline {
             steps { sh 'docker build -t demo-app:${GIT_COMMIT} .' }
         }
         stage('Test') {
-            steps { sh 'npm test' }
+            steps { sh 'docker run --rm demo-app:${GIT_COMMIT} npm test' }
         }
         stage('Deploy (simulado)') {
             steps {
